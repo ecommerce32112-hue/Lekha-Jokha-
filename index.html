@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1D2B5C">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lekha Jokha">
+<meta name="description" content="Lekha Jokha: apna paise ka hisab, Hindi aur English me.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Lekha Jokha</title>
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&family=Tiro+Devanagari+Hindi&display=swap">
+<style>
+/* Layout: one narrow column (max 760px): sticky header, content, fixed bottom tabs, bottom-sheet forms.
+   Ink-navy brand on cool paper; green = money to receive, red = money to pay. */
+:root{
+  --font-ui:'Hind',system-ui,-apple-system,'Segoe UI','Noto Sans Devanagari',sans-serif;
+  --font-brand:'Tiro Devanagari Hindi','Noto Serif Devanagari',Georgia,serif;
+  --bg:#F2F5F8; --surface:#FFFFFF; --surface2:#E9EEF3; --line:#D8DFE7;
+  --ink:#16202D; --muted:#566377;
+  --brand:#1D2B5C; --on-brand:#FFFFFF; --brand-soft:#E3E8F7;
+  --pos:#14753F; --pos-bg:#E3F3E9; --neg:#B3261E; --neg-bg:#FCE9E7; --warn:#8A5200; --warn-bg:#FDF0D5;
+  --bar-a:#1D2B5C; --bar-b:#0F8B8D;
+  --shadow:0 1px 2px rgba(22,32,45,.06),0 8px 24px rgba(22,32,45,.08);
+  --overlay:rgba(10,15,25,.5);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E131B; --surface:#161D28; --surface2:#1E2733; --line:#2A3544;
+    --ink:#E8EDF4; --muted:#9BA8BA;
+    --brand:#A9B8FF; --on-brand:#0E131B; --brand-soft:#232B4D;
+    --pos:#55D68A; --pos-bg:#12301F; --neg:#FF8A80; --neg-bg:#3B1C19; --warn:#F6BE55; --warn-bg:#382B0C;
+    --bar-a:#A9B8FF; --bar-b:#4FD1C5;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    --overlay:rgba(0,0,0,.65);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E131B; --surface:#161D28; --surface2:#1E2733; --line:#2A3544;
+  --ink:#E8EDF4; --muted:#9BA8BA;
+  --brand:#A9B8FF; --on-brand:#0E131B; --brand-soft:#232B4D;
+  --pos:#55D68A; --pos-bg:#12301F; --neg:#FF8A80; --neg-bg:#3B1C19; --warn:#F6BE55; --warn-bg:#382B0C;
+  --bar-a:#A9B8FF; --bar-b:#4FD1C5;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+  --overlay:rgba(0,0,0,.65);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.wrap{max-width:760px;margin:0 auto;min-height:100vh;padding-bottom:150px}
+.pos{color:var(--pos)} .neg{color:var(--neg)} .muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+
+/* header */
+#top{position:sticky;top:env(safe-area-inset-top,0px);z-index:9;background:var(--bg);display:flex;align-items:center;gap:12px;padding-block:12px;min-height:64px}
+.brand{font-family:var(--font-brand);font-size:25px;line-height:1.1;color:var(--brand);flex:1;min-width:0}
+.hdr-r{display:flex;align-items:center;gap:10px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--muted);display:inline-block}
+.dot.saved{background:var(--pos)} .dot.syncing{background:var(--warn)} .dot.error{background:var(--neg)} .dot.local{background:var(--warn)}
+.ttl{flex:1;min-width:0}
+.ttl-main{font-weight:700;font-size:19px;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ttl-sub{font-size:14px;color:var(--muted)}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;flex:none}
+.seg{display:inline-flex;background:var(--surface2);border-radius:10px;padding:3px;gap:2px}
+.seg button{border:0;background:transparent;border-radius:8px;min-height:36px;padding:0 13px;font-weight:600;color:var(--muted)}
+.seg button.on{background:var(--surface);color:var(--brand);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.seg-lg{display:grid;grid-template-columns:1fr 1fr;width:100%}
+.seg-lg button{min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+
+/* cards, lists */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.sum{display:grid;grid-template-columns:1fr 1fr;box-shadow:var(--shadow)}
+.sum-c{padding:16px}
+.sum-c+.sum-c{border-left:1px solid var(--line)}
+.lbl{font-size:14px;color:var(--muted);font-weight:500}
+.big{font-size:27px;font-weight:700;line-height:1.2;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.sum-net{grid-column:1/-1;border-top:1px solid var(--line);padding:10px 16px;display:flex;justify-content:space-between;gap:10px;font-size:15px;flex-wrap:wrap}
+.banner{border-radius:12px;padding:10px 14px;margin-block:12px 0;font-size:14.5px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.banner.warn{background:var(--warn-bg);color:var(--warn)}
+.banner button{border:1px solid currentColor;background:transparent;border-radius:8px;min-height:36px;padding:0 12px;font-weight:600;color:inherit}
+.tools{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+.search{position:relative}
+.search svg{position:absolute;left:13px;top:13px;color:var(--muted)}
+.search input{padding-left:42px}
+input,select,textarea{width:100%;min-height:46px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px}
+textarea{min-height:88px;resize:vertical}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;min-height:38px;padding:0 14px;font-weight:500;color:var(--muted);display:inline-flex;align-items:center}
+.chip.on,.chips input:checked+.chip{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.chips label{position:relative}
+.chips input{position:absolute;opacity:0;width:1px;height:1px;min-height:0}
+.chips input:focus-visible+.chip{outline:2px solid var(--brand);outline-offset:2px}
+.list{margin-top:14px;overflow:hidden}
+.row{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:12px;align-items:center;padding:12px 14px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row:hover{background:var(--surface2)}
+.av{width:44px;height:44px;border-radius:50%;background:var(--brand-soft);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:700}
+.r-name{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r-sub{font-size:13.5px;color:var(--muted);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.r-amt{text-align:right}
+.r-amt b{display:block;font-size:17px;font-variant-numeric:tabular-nums}
+.r-amt small{font-size:12.5px;color:var(--muted)}
+.pill{display:inline-flex;align-items:center;border-radius:999px;padding:0 9px;font-size:12.5px;font-weight:600;min-height:22px}
+.pill.neg{background:var(--neg-bg);color:var(--neg)} .pill.warn{background:var(--warn-bg);color:var(--warn)} .pill.pos{background:var(--pos-bg);color:var(--pos)} .pill.zero{background:var(--surface2);color:var(--muted)}
+.empty{text-align:center;padding:36px 20px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.empty h2{margin:0;font-size:20px}
+.empty p{margin:0;color:var(--muted);max-width:34ch}
+
+/* buttons */
+.btn{min-height:48px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:var(--on-brand)}
+.btn.danger{color:var(--neg);border-color:var(--neg)}
+.btn.sm{min-height:40px;padding:0 14px;font-size:15px}
+.btn.block{width:100%}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.btns .btn{flex:1 1 140px}
+.fab{position:fixed;right:max(16px,calc((100vw - 760px)/2 + 16px));bottom:calc(76px + env(safe-area-inset-bottom,0px));z-index:8;box-shadow:var(--shadow);border-radius:999px;min-height:54px;padding:0 22px}
+
+/* tabs */
+#tabs{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);z-index:9;padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs-in{max-width:760px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+.tab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:62px;font-size:13px;font-weight:600;color:var(--muted)}
+.tab.on{color:var(--brand)}
+
+/* party */
+.bal-card{padding:18px 16px;margin-top:4px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.bal-card .big{font-size:34px}
+.bal-meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.act2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.act2 .btn{min-height:54px;font-size:17px}
+.sect{margin:22px 0 8px;font-weight:700;font-size:15px;color:var(--muted);letter-spacing:.02em;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.int-card{padding:14px 16px;margin-top:14px;display:grid;gap:6px;font-size:15px}
+.int-card div{display:flex;justify-content:space-between;gap:12px}
+.sthead,.srow{display:grid;grid-template-columns:minmax(0,1fr) auto 92px;gap:10px;align-items:center}
+.sthead{font-size:12.5px;color:var(--muted);padding:0 14px 6px;font-weight:600}
+.sthead span:nth-child(n+2),.srow>div:nth-child(n+2){text-align:right}
+.srow{width:100%;text-align:left;border:0;border-top:1px solid var(--line);background:transparent;padding:11px 14px}
+.srow:first-child{border-top:0}
+.srow:hover{background:var(--surface2)}
+.s-d{font-weight:600;font-size:15px}
+.s-n{font-size:13.5px;color:var(--muted);overflow-wrap:anywhere}
+.s-a{font-weight:700;font-variant-numeric:tabular-nums}
+.s-t{font-size:12.5px;color:var(--muted)}
+.s-b{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.mode{display:inline-block;font-size:11.5px;font-weight:600;border:1px solid var(--line);border-radius:6px;padding:0 6px;margin-left:6px;color:var(--muted)}
+
+/* report */
+.kv{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;box-shadow:var(--shadow)}
+.kv>div{padding:14px;min-width:0}
+.kv>div+div{border-left:1px solid var(--line)}
+.kv .big{font-size:20px}
+.tbl{width:100%;border-collapse:collapse;font-size:15px}
+.tbl th{font-size:12.5px;color:var(--muted);text-align:right;padding:10px 12px;font-weight:600}
+.tbl td{padding:10px 12px;border-top:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl-wrap{overflow-x:auto}
+.bars{display:flex;flex-direction:column;gap:3px;min-width:90px}
+.bar{height:7px;border-radius:4px;min-width:2px}
+.bar.a{background:var(--bar-a)} .bar.b{background:var(--bar-b)}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted);padding:10px 14px;border-top:1px solid var(--line)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px}
+.dates{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+
+/* more */
+.set{padding:4px 16px;margin-bottom:14px}
+.set-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.set-row:first-child{border-top:0}
+.set-row .t{font-weight:600}
+.set-row .d{font-size:13.5px;color:var(--muted)}
+
+/* modal, toast, lock */
+#modal{position:fixed;inset:0;background:var(--overlay);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:520px;max-height:92vh;overflow:auto;background:var(--surface);border-radius:20px 20px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom,0px));box-shadow:var(--shadow)}
+.sheet h2{margin:0 0 14px;font-size:20px}
+.field{display:flex;flex-direction:column;gap:6px;margin-top:14px}
+.field>label,.lab{font-size:14px;font-weight:600;color:var(--muted)}
+.amt{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;padding:0 14px;background:var(--surface)}
+.amt span{font-size:26px;font-weight:700;color:var(--muted)}
+.amt input{border:0;font-size:28px;font-weight:700;min-height:58px;padding:0;background:transparent;font-variant-numeric:tabular-nums}
+.amt input:focus-visible{outline:0}
+.amt:focus-within{outline:2px solid var(--brand)}
+.hint{font-size:13.5px;color:var(--muted);margin:8px 0 0}
+.err{color:var(--neg);font-size:14px;margin:8px 0 0;min-height:20px}
+.sheet .btns{margin-top:18px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(80px + env(safe-area-inset-bottom,0px));z-index:60;background:var(--ink);color:var(--bg);border-radius:12px;padding:10px 16px;display:flex;gap:14px;align-items:center;max-width:min(92vw,520px);box-shadow:var(--shadow);font-size:15px}
+#toast button{background:transparent;border:0;color:inherit;font-weight:700;text-decoration:underline;min-height:32px}
+#lock{position:fixed;inset:0;z-index:80;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.lock-card{width:100%;max-width:340px;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.lock-card .brand{flex:none;font-size:32px}
+.lock-card input{text-align:center;font-size:28px;letter-spacing:.5em;max-width:220px;font-weight:700}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;min-height:40px}
+textarea.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;min-height:160px}
+@media (min-width:640px){
+  #modal{align-items:center}
+  .sheet{border-radius:20px}
+}
+@media (max-width:400px){
+  .big{font-size:23px}
+  .bal-card .big{font-size:30px}
+  .kv .big{font-size:16px}
+  .brand{font-size:22px}
+}
+@media (prefers-reduced-motion:no-preference){
+  .sheet{animation:up .18s ease-out}
+  @keyframes up{from{transform:translateY(16px);opacity:.6}to{transform:none;opacity:1}}
+}
+</style>
+
+</head>
+<body>
+<div class="wrap" id="app">
+  <header id="top"></header>
+  <main id="view"></main>
+</div>
+<nav id="tabs"></nav>
+<div id="lock" hidden></div>
+<div id="modal" hidden></div>
+<div id="toast" hidden></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- helpers ---------- */
+var $=function(s,r){return (r||document).querySelector(s)};
+var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var LS_KEY='lekha-jokha-v1';
+var newId=function(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)};
+var pad=function(n){return String(n).padStart(2,'0')};
+var isoOf=function(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())};
+var todayISO=function(){return isoOf(new Date())};
+var parseISO=function(s){var a=s.split('-').map(Number);return new Date(a[0],a[1]-1,a[2])};
+var daysBetween=function(a,b){return Math.round((parseISO(b)-parseISO(a))/864e5)};
+var addDays=function(iso,n){var d=parseISO(iso);d.setDate(d.getDate()+n);return isoOf(d)};
+
+var S={parties:{},settings:{lang:'hi',theme:'auto',pinHash:null}};
+var ui={q:'',filter:'all',range:'month',from:'',to:'',unlocked:false,sync:'local'};
+var lang='hi';
+var L=function(en,hi){return lang==='hi'?hi:en};
+
+var fmt=function(p){var v=Math.abs(p)/100;return '₹'+v.toLocaleString('en-IN',{minimumFractionDigits:Number.isInteger(v)?0:2,maximumFractionDigits:2})};
+var toPaise=function(s){var n=parseFloat(String(s).replace(/,/g,''));return isFinite(n)&&n>0?Math.round(n*100):0};
+var fmtDate=function(s){return s?parseISO(s).toLocaleDateString(lang==='hi'?'hi-IN':'en-IN',{day:'numeric',month:'short',year:'numeric'}):''};
+var monthLabel=function(ym){var a=ym.split('-');return new Date(+a[0],+a[1]-1,1).toLocaleDateString(lang==='hi'?'hi-IN':'en-IN',{month:'short',year:'numeric'})};
+
+var ICONS={plus:'M12 5v14M5 12h14',back:'M15 18l-6-6 6-6',out:'M7 17L17 7M8 7h9v9',inn:'M17 7L7 17M16 17H7V8',
+ search:'M21 21l-4.3-4.3M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z',edit:'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z',
+ lock:'M6 11h12v9H6zM8 11V8a4 4 0 0 1 8 0v3',send:'M22 2L11 13M22 2l-7 20-4-9-9-4z',check:'M20 6L9 17l-5-5',
+ book:'M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 19a2 2 0 0 1 2-2h13',clock:'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5l3 2',
+ chart:'M4 20V10M10 20V4M16 20v-7M22 20H2',menu:'M4 6h16M4 12h16M4 18h16',copy:'M9 9h11v11H9zM5 15H4V4h11v1',
+ trash:'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3'};
+var ic=function(n,s){s=s||20;return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="'+ICONS[n]+'"/></svg>'};
+
+/* ---------- money logic ---------- */
+var bal=function(p){return p.entries.reduce(function(s,e){return s+(e.type==='gave'?e.amt:-e.amt)},0)};
+var sortedEntries=function(p){return p.entries.slice().sort(function(a,b){return a.date===b.date?(a.ts||0)-(b.ts||0):(a.date<b.date?-1:1)})};
+var lastDate=function(p){return p.entries.reduce(function(m,e){return e.date>m?e.date:m},'')};
+function interest(p){
+  if(!p.rate) return null;
+  var es=sortedEntries(p),b=0,prev=null,acc=0,t=todayISO();
+  es.forEach(function(e){
+    if(prev!==null&&e.date>prev) acc+=b*(p.rate/100)*daysBetween(prev,e.date)/30;
+    b+=e.type==='gave'?e.amt:-e.amt; prev=e.date;
+  });
+  if(prev!==null&&t>prev) acc+=b*(p.rate/100)*daysBetween(prev,t)/30;
+  return Math.round(acc);
+}
+function modeName(m){return ({cash:L('Cash','नकद'),upi:'UPI',bank:L('Bank','बैंक'),cheque:L('Cheque','चेक'),other:L('Other','अन्य')})[m]||''}
+function normalize(id,d){
+  d=d||{};
+  return {id:id,name:String(d.name||'?'),phone:String(d.phone||''),note:String(d.note||''),rate:+d.rate||0,due:String(d.due||''),created:d.created||Date.now(),demo:!!d.demo,
+    entries:(Array.isArray(d.entries)?d.entries:[]).map(function(e){return {id:String(e.id||newId()),type:e.type==='got'?'got':'gave',amt:Math.round(+e.amt||0),date:String(e.date||todayISO()),mode:String(e.mode||'cash'),note:String(e.note||''),ts:+e.ts||0}}).filter(function(e){return e.amt>0})};
+}
+
+/* ---------- persistence: private cloud store with local cache ---------- */
+var db=null,profileRef=null,partiesRef=null,decided=false,pumping=false,inflight=null,retryTimer=null;
+var dirty=new Set();
+function cacheSave(){try{localStorage.setItem(LS_KEY,JSON.stringify({settings:S.settings,parties:S.parties}))}catch(e){}}
+function cacheLoad(){
+  try{
+    var c=JSON.parse(localStorage.getItem(LS_KEY)||'null');
+    if(c){S.settings=Object.assign(S.settings,c.settings||{});var ps=c.parties||{};Object.keys(ps).forEach(function(k){S.parties[k]=normalize(k,ps[k])});}
+  }catch(e){}
+}
+function kick(){cacheSave();if(db&&decided){ui.sync='syncing';renderStatus();pump()}}
+function markDirty(k){dirty.add(k);kick()}
+function isBusy(id){return dirty.has(id)||inflight===id}
+async function flush(k){
+  if(k==='settings'){await profileRef.set({v:1,settings:{lang:S.settings.lang,theme:S.settings.theme,pinHash:S.settings.pinHash||null}});return}
+  var p=S.parties[k],ref=partiesRef.doc(k);
+  if(p){var o=JSON.parse(JSON.stringify(p));await ref.set(o)}else{await ref.delete()}
+}
+async function pump(){
+  if(pumping||!db||!decided) return;
+  pumping=true;
+  try{
+    while(dirty.size){
+      var k=dirty.values().next().value; dirty.delete(k); inflight=k;
+      try{await flush(k)}catch(e){
+        dirty.add(k); inflight=null; ui.sync='error'; renderStatus();
+        var code=e&&e.code;
+        toast(code==='quota_exceeded'?L('Storage is full. Download a backup and remove old khatas.','जगह भर गई है। बैकअप डाउनलोड करें और पुराने खाते हटाएं।'):L('Could not save online. Your data is safe on this device; will retry.','ऑनलाइन सेव नहीं हुआ। डेटा इस डिवाइस पर सुरक्षित है; फिर कोशिश होगी।'));
+        clearTimeout(retryTimer);retryTimer=setTimeout(pump,20000);
+        return;
+      }
+      inflight=null;
+    }
+    ui.sync='saved';renderStatus();
+  }finally{pumping=false}
+}
+async function initCloud(){
+  var id=null;
+  try{
+    var cl=window.claude; if(!cl||!cl.use) throw 0;
+    var user=await cl.use('user'); id=user?await user.id():null; if(!id) throw 0;
+    var d=await cl.use('db'); if(!d) throw 0;
+    profileRef=d.doc('data/users/'+id+'/profile'); partiesRef=profileRef.collection('parties'); db=d;
+  }catch(e){ui.sync='local';renderStatus();return}
+  ui.sync='syncing';renderStatus();
+  var slow=setTimeout(function(){if(!decided){ui.sync='error';renderStatus();toast(L('Cannot reach online storage yet. Showing data saved on this device.','ऑनलाइन स्टोरेज से अभी नहीं जुड़ पाया। इस डिवाइस का सेव डेटा दिख रहा है।'))}},12000);
+  var gotP=false,gotQ=false,profExists=false,cloudCount=0;
+  function decide(){
+    if(decided||!(gotP&&gotQ)) return;
+    decided=true;clearTimeout(slow);
+    if(!profExists&&cloudCount===0&&Object.keys(S.parties).length){Object.keys(S.parties).forEach(function(k){dirty.add(k)});dirty.add('settings')}
+    ui.sync='saved';pump();renderStatus();
+  }
+  function fail(e){ui.sync='error';renderStatus()}
+  profileRef.onSnapshot(function(snap){
+    if(!snap.metadata.fromCache){gotP=true;profExists=snap.exists}
+    if(snap.exists&&!dirty.has('settings')&&inflight!=='settings'){
+      var s=(snap.data()||{}).settings;
+      if(s&&JSON.stringify(s)!==JSON.stringify({lang:S.settings.lang,theme:S.settings.theme,pinHash:S.settings.pinHash||null})){
+        S.settings=Object.assign(S.settings,s);cacheSave();applySettings();render();
+      }
+    }
+    decide();
+  },fail);
+  partiesRef.onSnapshot(function(snap){
+    var changed=false,seen={};
+    snap.docs.forEach(function(doc){
+      seen[doc.id]=1; if(isBusy(doc.id)) return;
+      var next=normalize(doc.id,doc.data()),cur=S.parties[doc.id];
+      if(!cur||JSON.stringify(cur)!==JSON.stringify(next)){S.parties[doc.id]=next;changed=true}
+    });
+    if(!snap.metadata.fromCache){gotQ=true;cloudCount=snap.size}
+    decide();
+    if(decided&&!snap.metadata.fromCache){
+      Object.keys(S.parties).forEach(function(id){if(!seen[id]&&!isBusy(id)){delete S.parties[id];changed=true}});
+    }
+    if(changed){cacheSave();softRender()}
+  },fail);
+}
+
+/* ---------- settings / theme ---------- */
+function applySettings(){
+  lang=S.settings.lang==='en'?'en':'hi';
+  document.documentElement.lang=lang==='hi'?'hi':'en';
+  if(S.settings.theme==='light'||S.settings.theme==='dark')document.documentElement.setAttribute('data-theme',S.settings.theme);
+  else document.documentElement.removeAttribute('data-theme');
+}
+async function hashPin(p){
+  try{var b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('lj:'+p));return Array.from(new Uint8Array(b)).map(function(x){return x.toString(16).padStart(2,'0')}).join('')}
+  catch(e){return 'x'+btoa('lj:'+p)}
+}
+
+/* ---------- ui bits ---------- */
+var toastTimer=null;
+function toast(msg,undo){
+  var t=$('#toast');t.hidden=false;t.innerHTML='<span></span>'+(undo?'<button type="button" id="t-undo">'+L('Undo','वापस लाएं')+'</button>':'');
+  $('span',t).textContent=msg;
+  if(undo){$('#t-undo').onclick=function(){t.hidden=true;undo()}}
+  clearTimeout(toastTimer);toastTimer=setTimeout(function(){t.hidden=true},undo?7000:4500);
+}
+function openModal(html,mount){
+  var m=$('#modal');m.hidden=false;m.innerHTML='<div class="sheet" role="dialog" aria-modal="true">'+html+'</div>';
+  m.onclick=function(e){if(e.target===m)closeModal()};
+  if(mount)mount($('.sheet',m));
+  var f=$('input:not([type=radio]):not([type=file]),textarea',m);if(f&&!/Mobi|Android/i.test(navigator.userAgent))f.focus();
+}
+function closeModal(){var m=$('#modal');m.hidden=true;m.innerHTML=''}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('#modal').hidden)closeModal()});
+function confirmBox(title,body,okLabel,onOk){
+  openModal('<h2>'+esc(title)+'</h2><p class="muted" style="margin:0">'+esc(body)+'</p><div class="btns"><button type="button" class="btn" data-x="no">'+L('Cancel','रद्द करें')+'</button><button type="button" class="btn danger" data-x="yes">'+esc(okLabel)+'</button></div>',function(s){
+    $('[data-x=no]',s).onclick=closeModal;$('[data-x=yes]',s).onclick=function(){closeModal();onOk()};
+  });
+}
+function textBox(title,text,hint){
+  openModal('<h2>'+esc(title)+'</h2>'+(hint?'<p class="hint" style="margin:0 0 10px">'+esc(hint)+'</p>':'')+'<textarea class="mono" id="tb" readonly></textarea><div class="btns"><button type="button" class="btn" id="tb-x">'+L('Close','बंद करें')+'</button></div>',function(s){
+    var ta=$('#tb',s);ta.value=text;ta.focus();ta.select();$('#tb-x',s).onclick=closeModal;
+  });
+}
+async function copyText(text,title){
+  try{await navigator.clipboard.writeText(text);toast(L('Copied','कॉपी हो गया'))}
+  catch(e){textBox(title||L('Copy this text','यह टेक्स्ट कॉपी करें'),text,L('Select all and copy.','सब चुनकर कॉपी करें।'))}
+}
+async function saveFile(filename,data,fallbackTitle){
+  try{
+    var a=document.createElement('a'),ty=/\.json$/.test(filename)?'application/json':'text/csv';
+    a.href=URL.createObjectURL(new Blob([data],{type:ty+';charset=utf-8'}));a.download=filename;a.style.display='none';
+    document.body.appendChild(a);a.click();var u=a.href;setTimeout(function(){URL.revokeObjectURL(u);a.remove()},2000);
+    if(/backup/.test(filename)){try{localStorage.setItem(LS_KEY+'-bk',String(Date.now()))}catch(e){}}
+    toast(L('File downloaded','फ़ाइल डाउनलोड हो गई'));
+  }catch(e){
+    textBox(fallbackTitle||filename,data,L('Download did not work. Copy this text and paste it into a file.','डाउनलोड नहीं हुआ। यह टेक्स्ट कॉपी करके फ़ाइल में रख लें।'));
+  }
+}
+
+/* ---------- routing / render ---------- */
+function route(){
+  var h=(location.hash||'').replace('#','')||'khata';
+  if(h.indexOf('party-')===0){var id=h.slice(6);return S.parties[id]?{name:'party',id:id}:{name:'khata'}}
+  return {name:['khata','due','report','more'].indexOf(h)>=0?h:'khata'};
+}
+var lastRouteKey='';
+function locked(){return !!S.settings.pinHash&&!ui.unlocked}
+function render(){
+  if(locked()){renderLock();return}
+  $('#lock').hidden=true;$('#app').hidden=false;$('#tabs').hidden=false;
+  var r=route(),key=r.name+(r.id||'');
+  $('#top').innerHTML=headerHTML(r);
+  var v=$('#view');
+  v.innerHTML=({khata:viewKhata,due:viewDue,report:viewReport,more:viewMore,party:viewParty})[r.name](r);
+  $('#tabs').innerHTML='<div class="tabs-in">'+[['khata','book',L('Khata','खाता')],['due','clock',L('Due','वापसी')],['report','chart',L('Report','रिपोर्ट')],['more','menu',L('More','और')]].map(function(t){
+    var on=(r.name===t[0]||(r.name==='party'&&t[0]==='khata'));
+    return '<a class="tab'+(on?' on':'')+'" href="#'+t[0]+'"'+(on?' aria-current="page"':'')+'>'+ic(t[1],22)+'<span>'+t[2]+'</span></a>';
+  }).join('')+'</div>';
+  if(key!==lastRouteKey){window.scrollTo(0,0);lastRouteKey=key}
+  document.title=L('Lekha Jokha','लेखा-जोखा');
+}
+function softRender(){
+  var a=document.activeElement;
+  if(a&&a.id==='q'&&$('#plist')){$('#plist').innerHTML=listHTML();return}
+  if(!$('#modal').hidden&&route().name==='party'){/* keep form focus; view refresh is safe */}
+  render();
+}
+function renderStatus(){[].forEach.call(document.querySelectorAll('.dot'),function(d){d.className='dot '+ui.sync;d.title=syncText()});var s=$('#sync-text');if(s)s.textContent=syncText()}
+function syncText(){return ({local:L('Saved on this phone only','सिर्फ़ इस फ़ोन में सेव'),syncing:L('Saving online…','ऑनलाइन सेव हो रहा है…'),saved:L('Saved online (private)','ऑनलाइन सेव (सिर्फ़ आपके लिए)'),error:L('Not synced. Data is kept on this device.','सिंक नहीं हुआ। डेटा इस डिवाइस पर है।')})[ui.sync]}
+
+function headerHTML(r){
+  if(r.name==='party'){
+    var p=S.parties[r.id];
+    return '<a class="icon-btn" href="#khata" aria-label="'+L('Back','पीछे')+'">'+ic('back')+'</a><div class="ttl"><div class="ttl-main">'+esc(p.name)+'</div>'+(p.phone?'<div class="ttl-sub num">'+esc(p.phone)+'</div>':'')+'</div><button type="button" class="icon-btn" data-act="edit-party" aria-label="'+L('Edit khata','खाता बदलें')+'">'+ic('edit')+'</button>';
+  }
+  return '<div class="brand">'+L('Lekha Jokha','लेखा-जोखा')+'</div><div class="hdr-r"><span id="sync-dot" class="dot '+ui.sync+'" title="'+esc(syncText())+'"></span><div class="seg" role="group" aria-label="'+L('Language','भाषा')+'"><button type="button" data-act="lang" data-v="hi" class="'+(lang==='hi'?'on':'')+'">हिं</button><button type="button" data-act="lang" data-v="en" class="'+(lang==='en'?'on':'')+'">EN</button></div></div>';
+}
+
+/* ---------- Khata (home) ---------- */
+function balLabel(b){return b>0?L('You will get','लेना है'):b<0?L('You will give','देना है'):L('Settled','बराबर')}
+function listHTML(){
+  var q=ui.q.trim().toLowerCase(),t=todayISO();
+  var ps=Object.values(S.parties).filter(function(p){return !q||p.name.toLowerCase().indexOf(q)>=0||p.phone.indexOf(q)>=0}).filter(function(p){
+    var b=bal(p);return ui.filter==='all'||(ui.filter==='get'&&b>0)||(ui.filter==='give'&&b<0)||(ui.filter==='zero'&&b===0)});
+  ps.sort(function(a,b){return Math.abs(bal(b))-Math.abs(bal(a))||a.name.localeCompare(b.name)});
+  if(!ps.length)return '<div class="empty"><p>'+L('No khata matches.','कोई खाता नहीं मिला।')+'</p></div>';
+  return ps.map(function(p){
+    var b=bal(p),od=b!==0&&p.due&&p.due<t;
+    return '<a class="row" href="#party-'+p.id+'"><div class="av">'+esc((Array.from(p.name.trim())[0]||'?').toUpperCase())+'</div><div style="min-width:0"><div class="r-name">'+esc(p.name)+'</div><div class="r-sub">'+(p.entries.length?esc(fmtDate(lastDate(p))):L('No entries','कोई एंट्री नहीं'))+(od?'<span class="pill neg">'+L('Overdue','देर हो गई')+'</span>':'')+'</div></div><div class="r-amt"><b class="'+(b>0?'pos':b<0?'neg':'muted')+'">'+(b===0?'₹0':fmt(b))+'</b><small>'+balLabel(b)+'</small></div></a>';
+  }).join('');
+}
+function backupDue(){try{var t=+localStorage.getItem(LS_KEY+'-bk')||0;return Date.now()-t>30*864e5}catch(e){return true}}
+function viewKhata(){
+  var ps=Object.values(S.parties),get=0,give=0,demo=ps.some(function(p){return p.demo});
+  ps.forEach(function(p){var b=bal(p);if(b>0)get+=b;else give-=b});
+  var net=get-give,h='';
+  if(ui.sync==='local'&&ps.length&&backupDue())h+='<div class="banner warn"><span>'+L('Data is saved only on this phone. Download a backup (More tab) so it is not lost.','डेटा सिर्फ़ इस फ़ोन में सेव है। खोने से बचाने के लिए बैकअप डाउनलोड करें (और टैब)।')+'</span><button type="button" data-act="backup">'+L('Backup now','बैकअप लें')+'</button></div>';
+  if(demo)h+='<div class="banner warn"><span>'+L('This is sample data.','यह नमूना डेटा है।')+'</span><button type="button" data-act="clear-demo">'+L('Remove sample','नमूना हटाएं')+'</button></div>';
+  if(!ps.length){
+    return h+'<div class="card empty" style="margin-top:16px"><h2>'+L('No khata yet','अभी कोई खाता नहीं')+'</h2><p>'+L('Make one khata for each person, then write what you gave and what you got.','हर इंसान का एक खाता बनाएं, फिर दिया और लिया लिखते जाएं।')+'</p><button type="button" class="btn primary" data-act="add-party">'+ic('plus')+L('Add first khata','पहला खाता बनाएं')+'</button><button type="button" class="linkbtn" data-act="load-demo">'+L('See with sample data','नमूना डेटा के साथ देखें')+'</button></div>';
+  }
+  var chips=[['all',L('All','सब')],['get',L('To receive','लेना है')],['give',L('To pay','देना है')],['zero',L('Settled','बराबर')]].map(function(c){return '<button type="button" class="chip'+(ui.filter===c[0]?' on':'')+'" data-act="filter" data-v="'+c[0]+'">'+c[1]+'</button>'}).join('');
+  return h+'<section class="card sum" style="margin-top:12px"><div class="sum-c"><div class="lbl">'+L('To receive','लेना है')+'</div><div class="big pos">'+fmt(get)+'</div></div><div class="sum-c"><div class="lbl">'+L('To pay','देना है')+'</div><div class="big neg">'+fmt(give)+'</div></div><div class="sum-net"><span class="muted">'+L('Net balance','कुल बाकी')+'</span><b class="num '+(net>=0?'pos':'neg')+'">'+(net>=0?L('You get ','लेना ')+fmt(net):L('You pay ','देना ')+fmt(net))+'</b></div></section>'+
+  '<div class="tools"><div class="search">'+ic('search',18)+'<input id="q" type="search" placeholder="'+L('Search name or phone','नाम या फ़ोन खोजें')+'" value="'+esc(ui.q)+'" autocomplete="off"></div><div class="chips">'+chips+'</div></div>'+
+  '<section class="card list" id="plist">'+listHTML()+'</section>'+
+  '<button type="button" class="btn primary fab" data-act="add-party">'+ic('plus')+L('New khata','नया खाता')+'</button>';
+}
+
+/* ---------- Party ---------- */
+function reminderText(p){
+  var b=bal(p),amt=fmt(b);
+  return lang==='hi'
+    ?'नमस्ते '+p.name+' जी, आपके '+amt+' बाकी हैं'+(p.due?' (वापसी की तारीख: '+fmtDate(p.due)+')':'')+'। कृपया जल्द भेज दें। धन्यवाद।'
+    :'Hello '+p.name+', a balance of '+amt+' is pending'+(p.due?' (due '+fmtDate(p.due)+')':'')+'. Please pay when you can. Thank you.';
+}
+function statementText(p){
+  var es=sortedEntries(p),run=0,lines=[(lang==='hi'?'लेखा-जोखा: ':'Statement: ')+p.name,''];
+  es.forEach(function(e){run+=e.type==='gave'?e.amt:-e.amt;lines.push(fmtDate(e.date)+'  '+(e.type==='gave'?(lang==='hi'?'दिया ':'Gave '):(lang==='hi'?'लिया ':'Got '))+fmt(e.amt)+(e.note?'  ('+e.note+')':'')+'  → '+(run<0?'-':'')+fmt(run))});
+  var b=bal(p);lines.push('',(lang==='hi'?'बाकी: ':'Balance: ')+fmt(b)+' ('+balLabel(b)+')');
+  return lines.join('\n');
+}
+function waLink(p,text){
+  var d=(p.phone||'').replace(/\D/g,'');if(d.length===10)d='91'+d;if(d.length===11&&d[0]==='0')d='91'+d.slice(1);
+  return 'https://wa.me/'+d+'?text='+encodeURIComponent(text);
+}
+function stmtHTML(p){
+  var es=sortedEntries(p),run=0;
+  var rows=es.map(function(e){run+=e.type==='gave'?e.amt:-e.amt;return {e:e,run:run}}).reverse();
+  if(!rows.length)return '<div class="empty"><p>'+L('No entries yet. Tap “I gave” or “I got”.','अभी कोई एंट्री नहीं। “मैंने दिया” या “मैंने लिया” दबाएं।')+'</p></div>';
+  return '<div class="sthead"><span>'+L('Date / note','तारीख / नोट')+'</span><span>'+L('Amount','रकम')+'</span><span>'+L('Balance','बाकी')+'</span></div>'+rows.map(function(x){
+    var e=x.e;
+    return '<button type="button" class="srow" data-act="edit-entry" data-id="'+e.id+'"><div><div class="s-d">'+esc(fmtDate(e.date))+'<span class="mode">'+esc(modeName(e.mode))+'</span></div>'+(e.note?'<div class="s-n">'+esc(e.note)+'</div>':'')+'</div><div><div class="s-a">'+(e.type==='gave'?'↗ ':'↙ ')+fmt(e.amt)+'</div><div class="s-t">'+(e.type==='gave'?L('Gave','दिया'):L('Got','लिया'))+'</div></div><div class="s-b '+(x.run>0?'pos':x.run<0?'neg':'muted')+'">'+(x.run===0?'₹0':fmt(x.run))+'</div></button>';
+  }).join('');
+}
+function viewParty(r){
+  var p=S.parties[r.id],b=bal(p),t=todayISO(),od=b!==0&&p.due&&p.due<t,it=interest(p);
+  var meta='';
+  if(b!==0&&p.due){var dd=daysBetween(t,p.due);meta+='<span class="pill '+(od?'neg':'warn')+'">'+L('Return by ','वापसी: ')+esc(fmtDate(p.due))+(od?' · '+L((-dd)+' days late',(-dd)+' दिन देर'):dd===0?' · '+L('today','आज'):' · '+L('in '+dd+' days',dd+' दिन में'))+'</span>'}
+  if(p.rate)meta+='<span class="pill zero">'+L('Interest ','ब्याज ')+p.rate+'%/'+L('mo','माह')+'</span>';
+  var h='<section class="card bal-card"><div class="lbl">'+(b===0?L('Balance','बाकी'):balLabel(b))+'</div><div class="big '+(b>0?'pos':b<0?'neg':'muted')+'">'+(b===0?L('Settled','बराबर'):fmt(b))+'</div>'+(meta?'<div class="bal-meta">'+meta+'</div>':'')+(p.note?'<div class="muted" style="font-size:14.5px">'+esc(p.note)+'</div>':'')+'</section>';
+  h+='<div class="act2"><button type="button" class="btn primary" data-act="new-entry" data-type="gave">'+ic('out')+L('I gave','मैंने दिया')+'</button><button type="button" class="btn primary" data-act="new-entry" data-type="got">'+ic('inn')+L('I got','मैंने लिया')+'</button></div>';
+  var tools='';
+  if(b!==0)tools+='<button type="button" class="btn sm" data-act="settle">'+ic('check',18)+L('Settle full amount','पूरा हिसाब चुकता करें')+'</button>';
+  if(b>0)tools+='<a class="btn sm" href="'+esc(waLink(p,reminderText(p)))+'" target="_blank" rel="noopener">'+ic('send',18)+L('Remind on WhatsApp','WhatsApp पर याद दिलाएं')+'</a><button type="button" class="btn sm" data-act="copy-remind">'+ic('copy',18)+L('Copy reminder','संदेश कॉपी')+'</button>';
+  if(p.entries.length)tools+='<a class="btn sm" href="'+esc(waLink(p,statementText(p)))+'" target="_blank" rel="noopener">'+ic('send',18)+L('Send statement','हिसाब भेजें')+'</a><button type="button" class="btn sm" data-act="copy-stmt">'+ic('copy',18)+L('Copy statement','हिसाब कॉपी')+'</button>';
+  if(tools)h+='<div class="btns" style="margin-top:12px">'+tools+'</div>';
+  if(it!==null){
+    var tot=b+it;
+    h+='<section class="card int-card"><div><span class="muted">'+L('Estimated interest (not added to balance)','अनुमानित ब्याज (बाकी में नहीं जुड़ा)')+'</span><b class="num '+(it>=0?'pos':'neg')+'">'+fmt(it)+'</b></div><div><span class="muted">'+L('Balance + interest','बाकी + ब्याज')+'</span><b class="num '+(tot>=0?'pos':'neg')+'">'+fmt(tot)+'</b></div><div class="hint" style="margin:0">'+L('Simple interest on the running balance, per day, at ','चल रहे बाकी पर रोज़ का साधारण ब्याज, दर ')+p.rate+'% '+L('per month.','प्रति माह।')+'</div></section>';
+  }
+  h+='<div class="sect"><span>'+L('Transactions','लेन-देन')+' ('+p.entries.length+')</span></div><section class="card list" style="margin-top:0">'+stmtHTML(p)+'</section>';
+  return h;
+}
+
+/* entry form */
+function openEntry(pid,type,eid,pre){
+  var p=S.parties[pid],ex=eid?p.entries.find(function(e){return e.id===eid}):null;
+  type=ex?ex.type:(type||'gave');
+  var v={amt:ex?(ex.amt/100):(pre&&pre.amt?pre.amt/100:''),date:ex?ex.date:todayISO(),mode:ex?ex.mode:'cash',note:ex?ex.note:(pre&&pre.note)||'',due:p.due||''};
+  var modes=['cash','upi','bank','cheque','other'];
+  openModal('<form id="f-e" novalidate><h2>'+(ex?L('Edit entry','एंट्री बदलें'):L('New entry','नई एंट्री'))+' · '+esc(p.name)+'</h2>'+
+   '<div class="seg seg-lg" id="e-type" role="group"><button type="button" data-v="gave">'+ic('out',18)+L('I gave','मैंने दिया')+'</button><button type="button" data-v="got">'+ic('inn',18)+L('I got','मैंने लिया')+'</button></div><p class="hint" id="e-hint"></p>'+
+   '<div class="field"><label for="e-amt">'+L('Amount','रकम')+'</label><div class="amt"><span>₹</span><input id="e-amt" inputmode="decimal" autocomplete="off" placeholder="0" value="'+esc(v.amt)+'"></div></div>'+
+   '<div class="field"><label for="e-date">'+L('Date','तारीख')+'</label><input id="e-date" type="date" value="'+esc(v.date)+'"></div>'+
+   '<div class="field"><span class="lab">'+L('Mode','तरीका')+'</span><div class="chips">'+modes.map(function(m){return '<label><input type="radio" name="e-mode" value="'+m+'"'+(v.mode===m?' checked':'')+'><span class="chip">'+esc(modeName(m))+'</span></label>'}).join('')+'</div></div>'+
+   '<div class="field"><label for="e-note">'+L('Note (optional)','नोट (वैकल्पिक)')+'</label><input id="e-note" maxlength="120" value="'+esc(v.note)+'"></div>'+
+   '<div class="field"><label for="e-due">'+L('Return by (optional)','वापसी की तारीख (वैकल्पिक)')+'</label><input id="e-due" type="date" value="'+esc(v.due)+'"></div>'+
+   '<p class="err" id="e-err" role="alert"></p>'+
+   '<div class="btns">'+(ex?'<button type="button" class="btn danger" id="e-del">'+ic('trash',18)+L('Delete','हटाएं')+'</button>':'<button type="button" class="btn" id="e-cancel">'+L('Cancel','रद्द करें')+'</button>')+'<button type="submit" class="btn primary">'+L('Save','सेव करें')+'</button></div></form>',function(s){
+    var cur=type;
+    function setType(t){cur=t;[].forEach.call(s.querySelectorAll('#e-type button'),function(b){b.classList.toggle('on',b.dataset.v===t)});
+      $('#e-hint',s).textContent=t==='gave'?L('You gave money. They owe you more.','आपने पैसे दिए। इनसे आपका लेना बढ़ेगा।'):L('You got money. It reduces what they owe you, or adds to what you owe.','आपने पैसे लिए। इनसे लेना घटेगा, या आपका देना बढ़ेगा।')}
+    setType(cur);
+    [].forEach.call(s.querySelectorAll('#e-type button'),function(b){b.onclick=function(){setType(b.dataset.v)}});
+    var c=$('#e-cancel',s);if(c)c.onclick=closeModal;
+    var d=$('#e-del',s);if(d)d.onclick=function(){closeModal();deleteEntry(pid,eid)};
+    $('#f-e',s).onsubmit=function(ev){
+      ev.preventDefault();
+      var amt=toPaise($('#e-amt',s).value),date=$('#e-date',s).value,err=$('#e-err',s);
+      if(!amt){err.textContent=L('Enter an amount greater than zero.','शून्य से ज़्यादा रकम डालें।');$('#e-amt',s).focus();return}
+      if(!date){err.textContent=L('Choose a date.','तारीख चुनें।');return}
+      var mode=(s.querySelector('input[name=e-mode]:checked')||{}).value||'cash',note=$('#e-note',s).value.trim();
+      if(ex){Object.assign(ex,{type:cur,amt:amt,date:date,mode:mode,note:note})}
+      else p.entries.push({id:newId(),ts:Date.now(),type:cur,amt:amt,date:date,mode:mode,note:note});
+      p.due=bal(p)===0?'':($('#e-due',s).value||'');
+      markDirty(pid);closeModal();render();toast(L('Saved','सेव हो गया'));
+    };
+  });
+}
+function deleteEntry(pid,eid){
+  var p=S.parties[pid],i=p.entries.findIndex(function(e){return e.id===eid});if(i<0)return;
+  var e=p.entries.splice(i,1)[0];markDirty(pid);render();
+  toast(L('Entry deleted','एंट्री हटा दी'),function(){if(S.parties[pid]){S.parties[pid].entries.push(e);markDirty(pid);render()}});
+}
+function openParty(pid){
+  var p=pid?S.parties[pid]:null;
+  openModal('<form id="f-p" novalidate><h2>'+(p?L('Edit khata','खाता बदलें'):L('New khata','नया खाता'))+'</h2>'+
+   '<div class="field"><label for="p-name">'+L('Name','नाम')+'</label><input id="p-name" maxlength="60" autocomplete="off" value="'+esc(p?p.name:'')+'"></div>'+
+   '<div class="field"><label for="p-phone">'+L('Phone (optional)','फ़ोन (वैकल्पिक)')+'</label><input id="p-phone" inputmode="tel" maxlength="20" autocomplete="off" value="'+esc(p?p.phone:'')+'"></div>'+
+   '<div class="field"><label for="p-note">'+L('Note (optional)','नोट (वैकल्पिक)')+'</label><input id="p-note" maxlength="120" value="'+esc(p?p.note:'')+'"></div>'+
+   '<div class="field"><label for="p-rate">'+L('Interest rate, % per month (optional)','ब्याज दर, % प्रति माह (वैकल्पिक)')+'</label><input id="p-rate" inputmode="decimal" placeholder="0" value="'+esc(p&&p.rate?p.rate:'')+'"></div>'+
+   '<p class="err" id="p-err" role="alert"></p><div class="btns">'+(p?'<button type="button" class="btn danger" id="p-del">'+ic('trash',18)+L('Delete khata','खाता हटाएं')+'</button>':'<button type="button" class="btn" id="p-cancel">'+L('Cancel','रद्द करें')+'</button>')+'<button type="submit" class="btn primary">'+L('Save','सेव करें')+'</button></div></form>',function(s){
+    var c=$('#p-cancel',s);if(c)c.onclick=closeModal;
+    var d=$('#p-del',s);if(d)d.onclick=function(){closeModal();deleteParty(pid)};
+    $('#f-p',s).onsubmit=function(ev){
+      ev.preventDefault();
+      var name=$('#p-name',s).value.trim();if(!name){$('#p-err',s).textContent=L('Enter a name.','नाम लिखें।');$('#p-name',s).focus();return}
+      var rate=parseFloat($('#p-rate',s).value.replace(/,/g,''));rate=isFinite(rate)&&rate>0?Math.round(rate*100)/100:0;
+      if(p){p.name=name;p.phone=$('#p-phone',s).value.trim();p.note=$('#p-note',s).value.trim();p.rate=rate;markDirty(pid);closeModal();render()}
+      else{var id=newId();S.parties[id]=normalize(id,{name:name,phone:$('#p-phone',s).value.trim(),note:$('#p-note',s).value.trim(),rate:rate,created:Date.now(),entries:[]});markDirty(id);closeModal();location.hash='#party-'+id;render()}
+    };
+  });
+}
+function deleteParty(pid){
+  var p=S.parties[pid];if(!p)return;
+  confirmBox(L('Delete this khata?','यह खाता हटाएं?'),L('"'+p.name+'" and all its '+p.entries.length+' entries will be removed. You can undo right after.','"'+p.name+'" और इसकी सभी '+p.entries.length+' एंट्री हट जाएंगी। हटाने के तुरंत बाद वापस ला सकते हैं।'),L('Delete','हटाएं'),function(){
+    var copy=JSON.parse(JSON.stringify(p));delete S.parties[pid];markDirty(pid);location.hash='#khata';render();
+    toast(L('Khata deleted','खाता हटा दिया'),function(){S.parties[pid]=normalize(pid,copy);markDirty(pid);render()});
+  });
+}
+
+/* ---------- Due ---------- */
+function viewDue(){
+  var t=todayISO(),ps=Object.values(S.parties).filter(function(p){return bal(p)!==0});
+  if(!ps.length)return '<div class="card empty" style="margin-top:16px"><h2>'+L('Nothing pending','कुछ बाकी नहीं')+'</h2><p>'+L('All khatas are settled.','सभी खाते बराबर हैं।')+'</p></div>';
+  var g={over:[],soon:[],later:[],none:[]};
+  ps.forEach(function(p){if(!p.due)g.none.push(p);else if(p.due<t)g.over.push(p);else if(p.due<=addDays(t,7))g.soon.push(p);else g.later.push(p)});
+  ['over','soon','later'].forEach(function(k){g[k].sort(function(a,b){return a.due<b.due?-1:1})});
+  g.none.sort(function(a,b){return Math.abs(bal(b))-Math.abs(bal(a))});
+  function sect(title,arr){
+    if(!arr.length)return '';
+    return '<div class="sect"><span>'+title+' ('+arr.length+')</span></div><section class="card list" style="margin-top:0">'+arr.map(function(p){
+      var b=bal(p),dd=p.due?daysBetween(t,p.due):null;
+      var when=p.due?(dd<0?L((-dd)+' days late',(-dd)+' दिन देर'):dd===0?L('Today','आज'):L('in '+dd+' days',dd+' दिन में'))+' · '+fmtDate(p.due):L('No return date','वापसी की तारीख नहीं');
+      return '<a class="row" href="#party-'+p.id+'"><div class="av">'+esc((Array.from(p.name.trim())[0]||'?').toUpperCase())+'</div><div style="min-width:0"><div class="r-name">'+esc(p.name)+'</div><div class="r-sub">'+esc(when)+'</div></div><div class="r-amt"><b class="'+(b>0?'pos':'neg')+'">'+fmt(b)+'</b><small>'+balLabel(b)+'</small></div></a>';
+    }).join('')+'</section>';
+  }
+  return sect(L('Overdue','देर हो गई'),g.over)+sect(L('Due in 7 days','7 दिन में वापसी'),g.soon)+sect(L('Later','आगे'),g.later)+sect(L('No return date','वापसी की तारीख नहीं'),g.none)+'<p class="hint" style="margin-top:14px">'+L('Set a return date from “I gave” or “I got” when adding an entry.','एंट्री जोड़ते समय “वापसी की तारीख” भर दें।')+'</p>';
+}
+
+/* ---------- Report ---------- */
+function rangeBounds(){
+  var n=new Date(),y=n.getFullYear(),m=n.getMonth();
+  if(ui.range==='month')return [isoOf(new Date(y,m,1)),isoOf(new Date(y,m+1,0))];
+  if(ui.range==='last')return [isoOf(new Date(y,m-1,1)),isoOf(new Date(y,m,0))];
+  if(ui.range==='fy'){var sy=m>=3?y:y-1;return [sy+'-04-01',(sy+1)+'-03-31']}
+  if(ui.range==='custom')return [ui.from||'0000-01-01',ui.to||'9999-12-31'];
+  return ['0000-01-01','9999-12-31'];
+}
+function flatEntries(){
+  var b=rangeBounds(),out=[];
+  Object.values(S.parties).forEach(function(p){p.entries.forEach(function(e){if(e.date>=b[0]&&e.date<=b[1])out.push(Object.assign({pid:p.id,pname:p.name,phone:p.phone},e))})});
+  return out.sort(function(a,c){return a.date===c.date?a.ts-c.ts:(a.date<c.date?-1:1)});
+}
+function viewReport(){
+  var es=flatEntries(),gave=0,got=0;es.forEach(function(e){if(e.type==='gave')gave+=e.amt;else got+=e.amt});
+  var rs=[['month',L('This month','इस महीने')],['last',L('Last month','पिछला महीना')],['fy',L('This financial year','इस वित्त वर्ष')],['all',L('All time','पूरा समय')],['custom',L('Custom','अपनी तारीखें')]];
+  var h='<div class="tools"><div class="chips">'+rs.map(function(r){return '<button type="button" class="chip'+(ui.range===r[0]?' on':'')+'" data-act="range" data-v="'+r[0]+'">'+r[1]+'</button>'}).join('')+'</div>'+
+    (ui.range==='custom'?'<div class="dates"><div class="field" style="margin:0"><label for="r-from">'+L('From','से')+'</label><input id="r-from" type="date" value="'+esc(ui.from)+'"></div><div class="field" style="margin:0"><label for="r-to">'+L('To','तक')+'</label><input id="r-to" type="date" value="'+esc(ui.to)+'"></div></div>':'')+'</div>';
+  h+='<section class="card kv" style="margin-top:14px"><div><div class="lbl">'+L('Gave','कुल दिया')+'</div><div class="big num">'+fmt(gave)+'</div></div><div><div class="lbl">'+L('Got','कुल लिया')+'</div><div class="big num">'+fmt(got)+'</div></div><div><div class="lbl">'+L('Difference','अंतर')+'</div><div class="big num '+(gave-got>=0?'pos':'neg')+'">'+(gave-got<0?'−':'')+fmt(gave-got)+'</div></div></section>';
+  if(!es.length){return h+'<div class="card empty" style="margin-top:14px"><p>'+L('No entries in this period.','इस अवधि में कोई एंट्री नहीं।')+'</p></div>'}
+  var mm={};es.forEach(function(e){var k=e.date.slice(0,7);mm[k]=mm[k]||{a:0,b:0};if(e.type==='gave')mm[k].a+=e.amt;else mm[k].b+=e.amt});
+  var keys=Object.keys(mm).sort().reverse(),mx=Math.max.apply(null,keys.map(function(k){return Math.max(mm[k].a,mm[k].b)}))||1;
+  h+='<div class="sect"><span>'+L('By month','महीने के हिसाब से')+'</span></div><section class="card" style="overflow:hidden"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>'+L('Month','महीना')+'</th><th>'+L('Gave','दिया')+'</th><th>'+L('Got','लिया')+'</th><th></th></tr></thead><tbody>'+keys.map(function(k){
+    return '<tr><td>'+esc(monthLabel(k))+'</td><td>'+fmt(mm[k].a)+'</td><td>'+fmt(mm[k].b)+'</td><td><div class="bars"><div class="bar a" style="width:'+Math.round(mm[k].a/mx*100)+'%"></div><div class="bar b" style="width:'+Math.round(mm[k].b/mx*100)+'%"></div></div></td></tr>';
+  }).join('')+'</tbody></table></div><div class="legend"><span><i style="background:var(--bar-a)"></i>'+L('Gave','दिया')+'</span><span><i style="background:var(--bar-b)"></i>'+L('Got','लिया')+'</span></div></section>';
+  var pm={};es.forEach(function(e){pm[e.pid]=pm[e.pid]||{n:e.pname,a:0,b:0};if(e.type==='gave')pm[e.pid].a+=e.amt;else pm[e.pid].b+=e.amt});
+  var pk=Object.keys(pm).sort(function(a,b){return (pm[b].a+pm[b].b)-(pm[a].a+pm[a].b)});
+  h+='<div class="sect"><span>'+L('By person','व्यक्ति के हिसाब से')+'</span></div><section class="card" style="overflow:hidden"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>'+L('Name','नाम')+'</th><th>'+L('Gave','दिया')+'</th><th>'+L('Got','लिया')+'</th><th>'+L('Balance now','अभी बाकी')+'</th></tr></thead><tbody>'+pk.map(function(id){
+    var b=S.parties[id]?bal(S.parties[id]):0;
+    return '<tr><td><a href="#party-'+id+'" style="color:var(--brand);font-weight:600">'+esc(pm[id].n)+'</a></td><td>'+fmt(pm[id].a)+'</td><td>'+fmt(pm[id].b)+'</td><td class="'+(b>0?'pos':b<0?'neg':'muted')+'">'+(b===0?'₹0':fmt(b))+'</td></tr>';
+  }).join('')+'</tbody></table></div></section>';
+  h+='<div class="btns" style="margin-top:16px"><button type="button" class="btn" data-act="export-csv">'+L('Download as Excel file (CSV)','Excel फ़ाइल (CSV) डाउनलोड करें')+'</button></div>';
+  return h;
+}
+function exportCSV(){
+  var es=flatEntries(),q=function(s){s=String(s==null?'':s);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+  var rows=[['Date','Name','Phone','Type','Amount (INR)','Mode','Note']];
+  es.forEach(function(e){rows.push([e.date,e.pname,e.phone,e.type==='gave'?'Gave':'Got',(e.amt/100).toFixed(2),e.mode,e.note])});
+  saveFile('lekha-jokha-report-'+todayISO()+'.csv','﻿'+rows.map(function(r){return r.map(q).join(',')}).join('\r\n'),'CSV');
+}
+
+/* ---------- More ---------- */
+function viewMore(){
+  var ps=Object.values(S.parties),n=ps.reduce(function(s,p){return s+p.entries.length},0),th=S.settings.theme;
+  function seg(act,cur,items){return '<div class="seg" role="group">'+items.map(function(i){return '<button type="button" data-act="'+act+'" data-v="'+i[0]+'" class="'+(cur===i[0]?'on':'')+'">'+i[1]+'</button>'}).join('')+'</div>'}
+  return '<div class="sect"><span>'+L('Preferences','पसंद')+'</span></div><section class="card set">'+
+   '<div class="set-row"><div><div class="t">'+L('Language','भाषा')+'</div></div>'+seg('lang',lang,[['hi','हिन्दी'],['en','English']])+'</div>'+
+   '<div class="set-row"><div><div class="t">'+L('Appearance','रंग-रूप')+'</div></div>'+seg('theme',th,[['auto',L('Auto','अपने-आप')],['light',L('Light','हल्का')],['dark',L('Dark','गहरा')]])+'</div></section>'+
+   '<div class="sect"><span>'+L('Privacy','गोपनीयता')+'</span></div><section class="card set"><div class="set-row"><div><div class="t">'+L('App lock (PIN)','ऐप लॉक (PIN)')+'</div><div class="d">'+(S.settings.pinHash?L('PIN is on. Asked every time you open the app.','PIN चालू है। ऐप खोलने पर हर बार पूछा जाएगा।'):L('Hide your khata behind a 4-digit PIN. This is a privacy screen, not encryption.','4 अंकों के PIN के पीछे खाता छिपाएं। यह सिर्फ़ गोपनीयता का पर्दा है, एन्क्रिप्शन नहीं।'))+'</div></div><div class="btns" style="flex:none">'+(S.settings.pinHash?'<button type="button" class="btn sm" data-act="lock-now">'+ic('lock',16)+L('Lock now','अभी लॉक करें')+'</button><button type="button" class="btn sm" data-act="pin-off">'+L('Turn off','बंद करें')+'</button>':'<button type="button" class="btn sm" data-act="pin-set">'+L('Set PIN','PIN लगाएं')+'</button>')+'</div></div></section>'+
+   '<div class="sect"><span>'+L('Your data','आपका डेटा')+'</span></div><section class="card set">'+
+   '<div class="set-row"><div><div class="t">'+L('Where it is saved','कहाँ सेव है')+'</div><div class="d"><span class="dot '+ui.sync+'"></span> <span id="sync-text">'+esc(syncText())+'</span></div></div><div class="num muted">'+ps.length+' '+L('khatas','खाते')+' · '+n+' '+L('entries','एंट्री')+'</div></div>'+
+   '<div class="set-row"><div><div class="t">'+L('Backup','बैकअप')+'</div><div class="d">'+L('Save a copy of everything as a file.','पूरे डेटा की एक फ़ाइल सेव करें।')+'</div></div><button type="button" class="btn sm" data-act="backup">'+L('Download backup','बैकअप डाउनलोड')+'</button></div>'+
+   '<div class="set-row"><div><div class="t">'+L('Restore','वापस लाएं')+'</div><div class="d">'+L('Replace everything with a backup file.','पूरा डेटा बैकअप फ़ाइल से बदलें।')+'</div></div><button type="button" class="btn sm" data-act="restore">'+L('Choose backup file','बैकअप फ़ाइल चुनें')+'</button></div>'+
+   '<div class="set-row"><div><div class="t neg">'+L('Delete everything','सब कुछ हटाएं')+'</div><div class="d">'+L('Removes all khatas and entries.','सभी खाते और एंट्री हट जाएंगी।')+'</div></div><button type="button" class="btn sm danger" data-act="wipe">'+L('Delete all','सब हटाएं')+'</button></div></section>';
+}
+function doBackup(){
+  var data={app:'lekha-jokha',version:1,exported:new Date().toISOString(),parties:Object.values(S.parties)};
+  saveFile('lekha-jokha-backup-'+todayISO()+'.json',JSON.stringify(data,null,1),L('Backup','बैकअप'));
+}
+function doRestore(){
+  openModal('<h2>'+L('Restore from backup','बैकअप से वापस लाएं')+'</h2><p class="hint" style="margin:0">'+L('Choose a .json file made by “Download backup”. It replaces all current data.','“बैकअप डाउनलोड” से बनी .json फ़ाइल चुनें। यह मौजूदा सारे डेटा को बदल देगी।')+'</p><div class="field"><input type="file" id="rf" accept=".json,application/json"></div><p class="err" id="rf-err" role="alert"></p><div class="btns"><button type="button" class="btn" id="rf-x">'+L('Cancel','रद्द करें')+'</button></div>',function(s){
+    $('#rf-x',s).onclick=closeModal;
+    $('#rf',s).onchange=function(ev){
+      var f=ev.target.files&&ev.target.files[0];if(!f)return;
+      var fr=new FileReader();
+      fr.onload=function(){
+        try{
+          var d=JSON.parse(fr.result);if(!d||d.app!=='lekha-jokha'||!Array.isArray(d.parties))throw 0;
+          var list=d.parties.map(function(p){return normalize(String(p.id||newId()).replace(/[^A-Za-z0-9_-]/g,'')||newId(),p)});
+          closeModal();
+          confirmBox(L('Replace all data?','सारा डेटा बदलें?'),L(list.length+' khatas will replace what you have now.',list.length+' खाते मौजूदा डेटा की जगह ले लेंगे।'),L('Replace','बदलें'),function(){
+            var old=Object.keys(S.parties);S.parties={};list.forEach(function(p){S.parties[p.id]=p});
+            old.forEach(markDirtyQuiet);list.forEach(function(p){markDirtyQuiet(p.id)});kick();
+            location.hash='#khata';render();toast(L('Backup restored','बैकअप वापस आ गया'));
+          });
+        }catch(e){$('#rf-err',s).textContent=L('This file is not a valid Lekha Jokha backup.','यह फ़ाइल सही लेखा-जोखा बैकअप नहीं है।')}
+      };
+      fr.readAsText(f);
+    };
+  });
+}
+function markDirtyQuiet(k){dirty.add(k)}
+
+/* ---------- demo data ---------- */
+function loadDemo(){
+  var t=todayISO(),mk=function(n,ph,rate,due,es){var id=newId();S.parties[id]=normalize(id,{name:n,phone:ph,rate:rate,due:due,demo:true,created:Date.now(),entries:es.map(function(e,i){return {id:newId(),ts:Date.now()+i,type:e[0],amt:e[1]*100,date:addDays(t,-e[2]),mode:e[3],note:e[4]}})});markDirtyQuiet(id)};
+  mk('Ramesh Kumar','9876500011',2,addDays(t,-5),[['gave',5000,40,'cash','Udhar'],['got',1500,20,'upi','Part payment'],['gave',800,6,'cash','']]);
+  mk('Sunita Devi','9876500022',0,addDays(t,6),[['gave',12000,25,'bank','Advance'],['got',2000,3,'upi','']]);
+  mk('Mohan Lal','',0,addDays(t,20),[['got',20000,30,'bank','Loan received'],['got',0.5,29,'cash','']].filter(function(e){return e[1]>=1}).concat([['gave',5000,10,'cash','Returned part']]));
+  mk('Anil Sharma','9876500044',0,'',[['gave',3000,12,'cash','Shop supplies'],['got',3000,2,'upi','Settled']]);
+  markDirty('settings');render();
+}
+
+/* ---------- lock ---------- */
+function renderLock(){
+  $('#app').hidden=true;$('#tabs').hidden=true;var l=$('#lock');l.hidden=false;
+  l.innerHTML='<div class="lock-card"><div class="brand">'+L('Lekha Jokha','लेखा-जोखा')+'</div>'+ic('lock',28)+'<p style="margin:0" class="muted">'+L('Enter your 4-digit PIN','अपना 4 अंकों का PIN डालें')+'</p><input id="pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" aria-label="PIN"><p class="err" id="pin-err" role="alert"></p><button type="button" class="linkbtn" id="pin-forgot">'+L('Forgot PIN?','PIN भूल गए?')+'</button></div>';
+  var inp=$('#pin');if(!/Mobi|Android/i.test(navigator.userAgent))inp.focus();
+  inp.oninput=async function(){
+    inp.value=inp.value.replace(/\D/g,'').slice(0,4);
+    if(inp.value.length===4){
+      if(await hashPin(inp.value)===S.settings.pinHash){ui.unlocked=true;render()}
+      else{$('#pin-err').textContent=L('Wrong PIN. Try again.','गलत PIN। फिर कोशिश करें।');inp.value=''}
+    }
+  };
+  $('#pin-forgot').onclick=function(){
+    openModal('<h2>'+L('Remove the PIN?','PIN हटाएं?')+'</h2><p class="muted" style="margin:0">'+L('Your khata data stays as it is. The PIN is only a privacy screen, so it can be removed here.','आपका खाता-डेटा वैसा ही रहेगा। PIN सिर्फ़ गोपनीयता का पर्दा है, इसलिए यहाँ से हट सकता है।')+'</p><div class="btns"><button type="button" class="btn" id="fx-no">'+L('Cancel','रद्द करें')+'</button><button type="button" class="btn danger" id="fx-yes">'+L('Remove PIN','PIN हटाएं')+'</button></div>',function(s){
+      $('#fx-no',s).onclick=closeModal;$('#fx-yes',s).onclick=function(){S.settings.pinHash=null;markDirty('settings');closeModal();ui.unlocked=true;render()};
+    });
+  };
+}
+function openPinSet(){
+  openModal('<form id="f-pin" novalidate><h2>'+L('Set a PIN','PIN लगाएं')+'</h2><div class="field"><label for="pn1">'+L('New 4-digit PIN','नया 4 अंकों का PIN')+'</label><input id="pn1" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></div><div class="field"><label for="pn2">'+L('Type it again','फिर से लिखें')+'</label><input id="pn2" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></div><p class="err" id="pn-err" role="alert"></p><div class="btns"><button type="button" class="btn" id="pn-x">'+L('Cancel','रद्द करें')+'</button><button type="submit" class="btn primary">'+L('Save PIN','PIN सेव करें')+'</button></div></form>',function(s){
+    $('#pn-x',s).onclick=closeModal;
+    $('#f-pin',s).onsubmit=async function(ev){
+      ev.preventDefault();var a=$('#pn1',s).value,b=$('#pn2',s).value,err=$('#pn-err',s);
+      if(!/^\d{4}$/.test(a)){err.textContent=L('PIN must be exactly 4 digits.','PIN ठीक 4 अंकों का होना चाहिए।');return}
+      if(a!==b){err.textContent=L('The two PINs do not match.','दोनों PIN एक जैसे नहीं हैं।');return}
+      S.settings.pinHash=await hashPin(a);ui.unlocked=true;markDirty('settings');closeModal();render();toast(L('PIN is on','PIN चालू हो गया'));
+    };
+  });
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',function(ev){
+  var el=ev.target.closest&&ev.target.closest('[data-act]');if(!el)return;
+  var act=el.dataset.act,v=el.dataset.v,r=route(),p=r.id?S.parties[r.id]:null;
+  switch(act){
+    case 'lang':S.settings.lang=v;applySettings();markDirty('settings');render();break;
+    case 'theme':S.settings.theme=v;applySettings();markDirty('settings');render();break;
+    case 'filter':ui.filter=v;render();break;
+    case 'range':ui.range=v;if(v==='custom'&&!ui.from){ui.from=addDays(todayISO(),-30);ui.to=todayISO()}render();break;
+    case 'add-party':openParty(null);break;
+    case 'edit-party':if(p)openParty(p.id);break;
+    case 'new-entry':if(p)openEntry(p.id,el.dataset.type);break;
+    case 'edit-entry':if(p)openEntry(p.id,null,el.dataset.id);break;
+    case 'settle':if(p){var b=bal(p);openEntry(p.id,b>0?'got':'gave',null,{amt:Math.abs(b),note:L('Settlement','हिसाब चुकता')})}break;
+    case 'copy-remind':if(p)copyText(reminderText(p),L('Reminder message','याद दिलाने का संदेश'));break;
+    case 'copy-stmt':if(p)copyText(statementText(p),L('Statement','हिसाब'));break;
+    case 'export-csv':exportCSV();break;
+    case 'backup':doBackup();break;
+    case 'restore':doRestore();break;
+    case 'load-demo':loadDemo();break;
+    case 'clear-demo':
+      Object.keys(S.parties).forEach(function(id){if(S.parties[id].demo){delete S.parties[id];markDirtyQuiet(id)}});
+      kick();render();toast(L('Sample data removed','नमूना डेटा हटा दिया'));break;
+    case 'wipe':confirmBox(L('Delete everything?','सब कुछ हटाएं?'),L('All khatas and entries will be removed. Download a backup first if you may need them.','सभी खाते और एंट्री हट जाएंगी। ज़रूरत हो तो पहले बैकअप डाउनलोड कर लें।'),L('Delete all','सब हटाएं'),function(){
+      Object.keys(S.parties).forEach(markDirtyQuiet);S.parties={};kick();render();toast(L('Everything deleted','सब कुछ हटा दिया'))});break;
+    case 'pin-set':openPinSet();break;
+    case 'pin-off':confirmBox(L('Turn off PIN?','PIN बंद करें?'),L('The app will open without asking for a PIN.','ऐप बिना PIN पूछे खुलेगा।'),L('Turn off','बंद करें'),function(){S.settings.pinHash=null;markDirty('settings');render()});break;
+    case 'lock-now':ui.unlocked=false;render();break;
+  }
+});
+document.addEventListener('input',function(ev){
+  var t=ev.target;
+  if(t.id==='q'){ui.q=t.value;var l=$('#plist');if(l)l.innerHTML=listHTML()}
+});
+document.addEventListener('change',function(ev){
+  var t=ev.target;
+  if(t.id==='r-from'){ui.from=t.value;render()}
+  if(t.id==='r-to'){ui.to=t.value;render()}
+});
+window.addEventListener('hashchange',function(){if(!$('#modal').hidden)closeModal();render()});
+
+/* ---------- start ---------- */
+cacheLoad();applySettings();render();initCloud();
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}
+})();
+</script>
+</body>
+</html>
